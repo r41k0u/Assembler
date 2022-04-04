@@ -37,9 +37,20 @@ for i in range(len(input_stream)):
     input_stream[i] = input_stream[i].split()
 
 start_addr = hex(int(input_stream[0][-1], 16))
+ref_addr = start_addr
 
 for i in range(1, len(input_stream)):
     input_stream[i].append(int(start_addr, 16) + 3*(i-1))
-    if "RSUB" in input_stream[i]:
-        break
 
+    if "RSUB" in input_stream[i]:
+        start_addr = hex(0x10000 - i*3)
+    elif "RESW" in input_stream[i]:
+        start_addr = hex(int(start_addr, 16) - 3 + 3*int(input_stream[i][-2]))
+    elif "RESB" in input_stream[i]:
+        start_addr = hex(int(start_addr, 16) - 3 + int(input_stream[i][-2]))
+    elif "BYTE" in input_stream[i]:
+        start_addr = hex(int(start_addr, 16) - 2)
+
+for i in range(len(input_stream)):
+    if input_stream[i][0] not in isa_tab:
+        sym_tab[input_stream[i][0]] = hex(int(input_stream[i][-1]))
